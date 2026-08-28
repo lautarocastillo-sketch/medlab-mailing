@@ -24,11 +24,14 @@
   "REQUISITO 3" más abajo) — el <a> real y su equivalente en VML para
   Outlook. Si cambiás el texto del botón, cambialo en los dos.
 
-  IMPORTANTE PARA PRODUCCIÓN: las dos imágenes (logo + imagen de cuerpo)
-  apuntan a "assets/..." (rutas locales) para que se vean en este preview
-  de localhost. Ningún cliente de mail puede leer una ruta local: antes de
-  enviar un mail real hay que subir esas imágenes a una URL pública HTTPS
-  (CDN / bucket de assets) y reemplazar los dos <img src="assets/...">.
+  IMÁGENES: hosteadas temporalmente en Vercel
+  (https://medlab-mailing.vercel.app, repo lautarocastillo-sketch/medlab-mailing)
+  solo para que el cliente vea la propuesta funcionando en un mail real. Es
+  un hosting de paso: cuando los devs migren esto a su ESP definitivo
+  (SendGrid/Braze/Customer.io/etc.), hay que resubir las dos imágenes al
+  image manager del ESP y reemplazar los dos <img src="https://medlab-mailing...">
+  por las URLs finales del ESP. Después de esa migración se puede dar de
+  baja el proyecto de Vercel.
   ============================================================================
 -->
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -158,10 +161,10 @@
              alt text del logo siguen apareciendo igual. -->
         <tr>
           <td class="force-bg-brand stack-padding" align="center" style="background-color:#012E2E; padding:24px 40px; border-radius:16px 16px 0 0;">
-            <!-- EDITABLE (solo antes de enviar): reemplazar este src por la
-                 URL pública HTTPS del logo. Ningún cliente de mail puede leer
-                 "assets/..." — esa ruta local es solo para este preview. -->
-            <img src="assets/logo-cs-medlab.png" width="193" height="64" alt="Colonia Suiza · CS MedLab" style="display:block; width:193px; height:64px; max-width:100%;">
+            <!-- Hosteado en Vercel (repo: lautarocastillo-sketch/medlab-mailing).
+                 Si migrás esto a un ESP definitivo, reemplazá por la URL del
+                 image manager del ESP y podés dar de baja el deploy de Vercel. -->
+            <img src="https://medlab-mailing.vercel.app/assets/logo-cs-medlab.png" width="193" height="64" alt="Colonia Suiza · CS MedLab" style="display:block; width:193px; height:64px; max-width:100%;">
           </td>
         </tr>
 
@@ -250,11 +253,11 @@
               </tr>
               <tr>
                 <td style="padding-bottom:16px;">
-                  <!-- EDITABLE: imagen de cuerpo (src -> URL pública HTTPS
-                       antes de enviar) + alt text obligatorio y descriptivo:
-                       si se bloquea, el párrafo de arriba ya contó todo lo
-                       importante, esta imagen es solo ilustrativa. -->
-                  <img src="assets/imagen-cuerpo-ejemplo.jpg" width="520" height="347" alt="Profesional de salud completando documentación en un consultorio" class="fluid" style="display:block; width:100%; max-width:520px; height:auto; border-radius:16px;">
+                  <!-- Hosteado en Vercel (repo: lautarocastillo-sketch/medlab-mailing).
+                       Alt text obligatorio y descriptivo: si se bloquea, el
+                       párrafo de arriba ya contó todo lo importante, esta
+                       imagen es solo ilustrativa. -->
+                  <img src="https://medlab-mailing.vercel.app/assets/imagen-cuerpo-ejemplo.jpg" width="520" height="347" alt="Profesional de salud completando documentación en un consultorio" class="fluid" style="display:block; width:100%; max-width:520px; height:auto; border-radius:16px;">
                 </td>
               </tr>
             </table>
