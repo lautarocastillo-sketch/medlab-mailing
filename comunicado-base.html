@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  PLANTILLA BASE DE MAILING — Colonia Suiza / CS MedLab
+  Basada en: Figma "CS - MEDLAB Restyling" (node 19483:37274)
+
+  CÓMO ADAPTAR ESTA PLANTILLA A UN NUEVO DISPARADOR DE ENVÍO
+  ----------------------------------------------------------------------------
+  Hay dos tipos de contenido variable, tratados distinto a propósito:
+
+  1) Copy de campaña (título, copete, chip, texto del botón, preheader,
+     imagen de cuerpo) -> quedan como TEXTO LITERAL editable directamente
+     en este HTML, marcado con comentarios "EDITABLE:". Para un disparador
+     nuevo (documento rechazado, vencido, bienvenida, etc.) se copia este
+     archivo y se edita ese texto a mano.
+
+  2) Datos por-envío/por-destinatario (nombre, motivo puntual, links, URL
+     del botón) -> quedan como {{variable}} para que el ESP/sistema de
+     envío (SendGrid, Braze, Customer.io, Mailchimp, un script propio, etc.)
+     los inyecte en runtime. Si tu sistema usa otra sintaxis (Handlebars,
+     Django {% %}, Liquid), es un find & replace directo.
+
+  OJO: el texto del botón está DUPLICADO a propósito en dos lugares (ver
+  "REQUISITO 3" más abajo) — el <a> real y su equivalente en VML para
+  Outlook. Si cambiás el texto del botón, cambialo en los dos.
+
+  IMPORTANTE PARA PRODUCCIÓN: las dos imágenes (logo + imagen de cuerpo)
+  apuntan a "assets/..." (rutas locales) para que se vean en este preview
+  de localhost. Ningún cliente de mail puede leer una ruta local: antes de
+  enviar un mail real hay que subir esas imágenes a una URL pública HTTPS
+  (CDN / bucket de assets) y reemplazar los dos <img src="assets/...">.
+  ============================================================================
+-->
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- REQUISITO 8 (dark mode): le decimos a los clientes que soportan el meta que
+     este mail está pensado para modo claro únicamente, así no reinterpretan colores. -->
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Comunicado — Colonia Suiza</title><!-- EDITABLE: título interno de la pestaña, no lo ve el destinatario -->
+
+<!--[if mso]>
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
+
+<!-- REQUISITO 4 (tipografía progresiva): Google Fonts. Si el cliente bloquea
+     fuentes externas (Outlook de escritorio, muchos webmail corporativos),
+     el fallback Arial/Helvetica de cada estilo toma el control solo. -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Red+Hat+Display:wght@600&display=swap" rel="stylesheet" media="screen">
+
+<style>
+  /* ============================================================
+     REQUISITO 6 (reset Outlook.com / Windows Mail) +
+     REQUISITO 2 (reset general de imágenes/tablas para email)
+     ============================================================ */
+  html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+  * { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse !important; }
+  img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; display: block; }
+  a { text-decoration: underline; }
+
+  /* .ExternalClass es el wrapper que usa Outlook.com / Windows Mail alrededor
+     del body. Sin este reset, mete line-height:100% y rompe el interlineado. */
+  .ExternalClass, .ExternalClass p, .ExternalClass span,
+  .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height: 100%; }
+
+  /* Gmail agrega un padding raro en algunos casos con blockquote/u; lo neutralizamos */
+  u + #body_style a { color: inherit; text-decoration: none; }
+
+  /* ============================================================
+     REQUISITO 4 (tipografía): clases reutilizables para no repetir
+     el font-family completo con fallback en cada tag.
+     ============================================================ */
+  .ff-heading { font-family: 'Red Hat Display', Arial, Helvetica, sans-serif; }
+  .ff-body    { font-family: Inter, Arial, Helvetica, sans-serif; }
+
+  /* ============================================================
+     REQUISITO 1 (mobile-first fluido dentro del wrapper fijo).
+     Nada de flexbox/grid — solo ajustes de tamaño con media query,
+     que es soportada ampliamente incluso en clientes que no son 100% CSS3.
+     ============================================================ */
+  @media only screen and (max-width: 600px) {
+    .email-container { width: 100% !important; }
+    .fluid { width: 100% !important; max-width: 100% !important; height: auto !important; }
+    .stack-padding { padding-left: 24px !important; padding-right: 24px !important; }
+    .h1-responsive { font-size: 20px !important; }
+  }
+
+  /* ============================================================
+     REQUISITO 8 (dark mode): forzamos el bloque blanco y los textos
+     oscuros a mantenerse como están definidos, sin dejar que Apple
+     Mail / Outlook.com inviertan automáticamente a modo oscuro.
+     ============================================================ */
+  @media (prefers-color-scheme: dark) {
+    .force-bg-white  { background-color: #ffffff !important; }
+    .force-bg-brand  { background-color: #012E2E !important; }
+    .force-text-brand{ color: #012E2E !important; }
+    .force-text-body { color: #616268 !important; }
+    .force-text-white{ color: #ffffff !important; }
+  }
+  /* Hook específico de Outlook.com dark mode */
+  [data-ogsc] .force-bg-white  { background-color: #ffffff !important; }
+  [data-ogsc] .force-bg-brand  { background-color: #012E2E !important; }
+  [data-ogsc] .force-text-brand{ color: #012E2E !important; }
+  [data-ogsc] .force-text-body { color: #616268 !important; }
+  [data-ogsc] .force-text-white{ color: #ffffff !important; }
+</style>
+</head>
+<body id="body_style" style="margin:0; padding:0; background-color:#EEEEF0;" class="force-bg-white">
+
+<!-- ============================================================
+     REQUISITO 7 (preheader oculto): esto es lo que se ve en la
+     bandeja de entrada como texto de preview, en vez de que el
+     cliente tome la primera línea del body (que sería "CS MedLab").
+     EDITABLE: reemplazar {{preheader}} por el texto real (~90-110
+     caracteres es lo que suelen mostrar Gmail/Apple Mail).
+     ============================================================ -->
+<div style="display:none; font-size:1px; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden; mso-hide:all;">
+  Novedad sobre tu legajo digital: hay una acción pendiente de tu parte.<!-- EDITABLE: preheader, ideal 90-110 caracteres -->
+  &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+</div>
+
+<!-- ============================================================
+     REQUISITO 1 (tablas en vez de div/flex/grid) +
+     REQUISITO 2 (600px fijo con wrapper condicional MSO, 100% fluido
+     para el resto). Outlook de escritorio renderiza con el motor de
+     Word: sin este truco, ignora max-width y estira todo a lo ancho
+     de la ventana.
+     ============================================================ -->
+<!--[if mso]>
+<table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+<tr>
+<td>
+<![endif]-->
+<table role="presentation" class="email-container" align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px; margin:0 auto;">
+  <tr>
+    <td style="padding:24px 0;" align="center">
+
+      <!-- ============================================================
+           CARD PRINCIPAL (borde + radius). El radius de tabla no lo
+           respeta Outlook de escritorio: se degrada a esquinas rectas,
+           que es un fallback aceptable (no rompe la lectura del mail).
+           ============================================================ -->
+      <table role="presentation" class="email-container force-bg-white" align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px; background-color:#ffffff; border:1px solid #BABABF; border-radius:16px;">
+
+        <!-- ======================= HEADER ======================= -->
+        <!-- El color de fondo vive en el <td>, no en la imagen: si el
+             cliente bloquea imágenes, el rectángulo verde-oscuro y el
+             alt text del logo siguen apareciendo igual. -->
+        <tr>
+          <td class="force-bg-brand stack-padding" align="center" style="background-color:#012E2E; padding:24px 40px; border-radius:16px 16px 0 0;">
+            <!-- EDITABLE (solo antes de enviar): reemplazar este src por la
+                 URL pública HTTPS del logo. Ningún cliente de mail puede leer
+                 "assets/..." — esa ruta local es solo para este preview. -->
+            <img src="assets/logo-cs-medlab.png" width="193" height="64" alt="Colonia Suiza · CS MedLab" style="display:block; width:193px; height:64px; max-width:100%;">
+          </td>
+        </tr>
+
+        <!-- ======================= CHIP DE ESTADO ======================= -->
+        <!-- EDITABLE: texto y color del chip según el disparador.
+             Ejemplos de paleta ya usados en el design system:
+               Acción requerida  -> bg #FFCD71 / texto #7A230D (warning)
+               Rechazado         -> bg #F8D7D3 / texto #B3261E (error) [ajustar a tokens reales]
+               Vencido           -> bg #FFE8B3 / texto #946200 (warning claro)
+               Aprobado / OK     -> bg #CFEFE0 / texto #0B6B4F (success) -->
+        <tr>
+          <td class="stack-padding" style="padding:32px 40px 0 32px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td bgcolor="#FFCD71" style="background-color:#FFCD71; border-radius:32px; padding:8px 16px;">
+                  <span class="ff-body" style="font-family:Inter,Arial,Helvetica,sans-serif; font-weight:600; font-size:10px; line-height:13px; letter-spacing:0.5px; color:#7A230D; text-transform:uppercase; white-space:nowrap;">
+                    ACCIÓN REQUERIDA
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ======================= TÍTULO ======================= -->
+        <tr>
+          <td class="stack-padding" style="padding:16px 40px 0 32px;">
+            <h1 class="ff-heading h1-responsive force-text-brand" style="margin:0; font-family:'Red Hat Display',Arial,Helvetica,sans-serif; font-weight:600; font-size:24px; line-height:30px; letter-spacing:-0.24px; color:#012E2E;">
+              Título del comunicado<!-- EDITABLE: título del comunicado -->
+            </h1>
+          </td>
+        </tr>
+
+        <!-- ======================= COPETE (bajada) ======================= -->
+        <tr>
+          <td class="stack-padding" style="padding:8px 40px 0 32px;">
+            <p class="ff-body force-text-brand" style="margin:0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:14px; line-height:21px; color:#012E2E;">
+              Bajada breve que resume el comunicado en una o dos líneas.<!-- EDITABLE: bajada de 1-2 líneas -->
+            </p>
+          </td>
+        </tr>
+
+        <!-- ======================= DIVISOR ======================= -->
+        <tr>
+          <td style="padding:8px 32px 0 32px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+              <td height="1" bgcolor="#BABABF" style="background-color:#BABABF; font-size:1px; line-height:1px;">&nbsp;</td>
+            </tr></table>
+          </td>
+        </tr>
+
+        <!-- ======================= CONTENIDO ======================= -->
+        <!-- EDITABLE: todo el bloque de texto y la imagen de cuerpo.
+             El texto de acá es el único que puede tener negrita/links;
+             está armado como HTML plano, no depende de componentes de
+             Figma, así que se edita como cualquier párrafo de mail. -->
+        <tr>
+          <td class="stack-padding" style="padding:8px 32px 0 32px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="padding-bottom:16px;">
+                  <p class="ff-body force-text-body" style="margin:0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:14px; line-height:21px; color:#616268;">
+                    •&nbsp; Primer punto de ejemplo de la lista<br>
+                    Hola {{nombre_destinatario}}, te escribimos desde Colonia Suiza para informarte una novedad sobre tu legajo digital. Este es un párrafo de ejemplo para validar interlineado y tipografía.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom:16px;">
+                  <p class="ff-body force-text-body" style="margin:0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:14px; line-height:21px; color:#616268;">
+                    •&nbsp; Segundo punto, puede incluir texto en negrita.<br>
+                    Motivo: <strong style="font-weight:700;">{{motivo_rechazo}}</strong>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom:16px;">
+                  <p class="ff-body force-text-body" style="margin:0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:14px; line-height:21px; color:#616268;">
+                    •&nbsp; Tercer punto con un enlace <a href="{{link_mas_informacion}}" style="color:#616268; text-decoration:underline;">a más información</a>.<br>
+                    Podés revisar el detalle completo desde la app, o escribirnos a
+                    <a href="mailto:rrhh@coloniasuiza.com.ar" style="color:#016666; text-decoration:underline;">rrhh@coloniasuiza.com.ar</a>
+                    si tenés dudas. También podés consultar más información en
+                    <a href="{{link_secundario}}" style="color:#016666; text-decoration:underline;">este enlace</a>.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom:16px;">
+                  <!-- EDITABLE: imagen de cuerpo (src -> URL pública HTTPS
+                       antes de enviar) + alt text obligatorio y descriptivo:
+                       si se bloquea, el párrafo de arriba ya contó todo lo
+                       importante, esta imagen es solo ilustrativa. -->
+                  <img src="assets/imagen-cuerpo-ejemplo.jpg" width="520" height="347" alt="Profesional de salud completando documentación en un consultorio" class="fluid" style="display:block; width:100%; max-width:520px; height:auto; border-radius:16px;">
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ======================= CTA (confirmación de lectura) ======================= -->
+        <tr>
+          <td class="stack-padding" style="padding:16px 40px 8px 32px;" align="center">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center" style="padding:16px 0;">
+                  <p class="ff-body force-text-body" style="margin:0 0 16px 0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:12px; line-height:18px; color:#616268; text-align:center;">
+                    Para dejar constancia de que leíste este comunicado, confirmá tu lectura tocando el siguiente botón.<!-- EDITABLE, o vaciar el <p> si el disparador no lleva CTA de confirmación -->
+                  </p>
+
+                  <!-- REQUISITO 3 (botón con fallback VML): en Outlook de
+                       escritorio un <a> con border-radius se ve como un link
+                       cuadrado sin fondo. El bloque VML dibuja un botón
+                       sólido y redondeado nativo de Word/Outlook. -->
+                  <!--[if mso]>
+                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{cta_url}}" style="height:45px;v-text-anchor:middle;width:280px;" arcsize="100%" strokecolor="#012E2E" fillcolor="#012E2E">
+                  <w:anchorlock/>
+                  <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Ir a cargar el documento</center>
+                  </v:roundrect>
+                  <![endif]-->
+                  <!--[if !mso]><!-->
+                  <a href="{{cta_url}}" target="_blank" style="background-color:#012E2E; border-radius:100px; color:#ffffff; display:inline-block; font-family:Inter,Arial,Helvetica,sans-serif; font-size:16px; font-weight:600; line-height:24px; padding:10px 16px; text-align:center; text-decoration:none; min-width:200px;" class="force-bg-brand force-text-white">
+                    Ir a cargar el documento<!-- EDITABLE: texto del botón -->
+                  </a>
+                  <!--<![endif]-->
+
+                  <p class="ff-body force-text-brand" style="margin:16px 0 0 0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:11px; line-height:16px; color:#012E2E; text-align:center;">
+                    Este es un mensaje automático, no respondas a esta casilla.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ======================= DIVISOR ======================= -->
+        <tr>
+          <td style="padding:0 40px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+              <td height="1" bgcolor="#BABABF" style="background-color:#BABABF; font-size:1px; line-height:1px;">&nbsp;</td>
+            </tr></table>
+          </td>
+        </tr>
+
+        <!-- ======================= FOOTER ======================= -->
+        <!-- Generalmente NO editable por disparador — son los datos legales
+             fijos de la empresa. Sí conviene mantenerlo en una sola plantilla
+             madre si en algún momento hay más de una marca/entidad emisora. -->
+        <tr>
+          <td class="stack-padding" align="center" style="padding:16px 32px 32px 32px; border-radius:0 0 16px 16px;">
+            <p class="ff-heading force-text-brand" style="margin:0 0 6px 0; font-family:'Red Hat Display',Arial,Helvetica,sans-serif; font-weight:600; font-size:14px; line-height:20px; letter-spacing:0.14px; color:#012E2E; text-align:center;">
+              Colonia Suiza · Grupo Río Varadero
+            </p>
+            <p class="ff-body force-text-body" style="margin:0 0 6px 0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:11px; line-height:16px; color:#616268; text-align:center;">
+              Avda Rivadavia 611, 2do Piso, Buenos Aires, C1002AAE · +54 (11) 6264-0244
+            </p>
+            <p class="ff-body force-text-body" style="margin:0; font-family:Inter,Arial,Helvetica,sans-serif; font-weight:400; font-size:11px; line-height:16px; color:#616268; text-align:center;">
+              © 2026 Colonia Suiza. Todos los derechos reservados.<!-- EDITABLE: actualizar el año -->
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      <!-- fin CARD PRINCIPAL -->
+
+    </td>
+  </tr>
+</table>
+<!--[if mso]>
+</td>
+</tr>
+</table>
+<![endif]-->
+
+</body>
+</html>
